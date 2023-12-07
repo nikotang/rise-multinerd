@@ -7,19 +7,14 @@ from metrics import set_compute_metrics
 from tokenizer import tokenize_and_align_labels, system_B_labels
 import labels
 
-system = argv[1]
+if len(argv) != 4:
+    raise Exception('Give 3 arguments: system, model directory and output directory. ')
+
+system, model_dir, output_dir = argv[1:4]
 if system not in ['A', 'B']:
     raise ValueError('Fine-tuning system is either "A" or "B". ') 
 
-try:
-    model_dir = argv[2]
-except IndexError:
-    model_dir = None
-
-def main(system, model_dir):
-    if model_dir == None:
-        model_dir = f'./{system}_results'
-    
+def main(system, model_dir, output_dir):
     tokenizer = AutoTokenizer.from_pretrained(model_dir)
     data_collator = DataCollatorForTokenClassification(tokenizer=tokenizer)
 
@@ -43,7 +38,7 @@ def main(system, model_dir):
     test_model = AutoModelForTokenClassification.from_pretrained(model_dir).to('cuda')
 
     test_args = TrainingArguments(
-        output_dir = f'./{system}_test',
+        output_dir = output_dir,
         do_train = False,
         do_predict = True,
         per_device_eval_batch_size = 64

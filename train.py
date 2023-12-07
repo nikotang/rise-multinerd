@@ -14,20 +14,15 @@ from tokenizer import tokenize_and_align_labels, system_B_labels
 import labels
 from metrics import set_compute_metrics
 
+if len(argv) != 4:
+    raise Exception('Give 3 arguments: system, config directory and output directory. ')
 
-system = argv[1]
+system, conf, output_dir = argv[1:4]
 if system not in ['A', 'B']:
     raise ValueError('Fine-tuning system is either "A" or "B". ') 
 
-try:
-    output_dir = argv[2]
-except IndexError:
-    output_dir = None
-
-def main(system, output_dir, conf='./conf.yml'):
+def main(system, conf, output_dir):
     conf = load_conf(conf)
-    if output_dir == None:
-        output_dir = f'./{system}_results'
 
     # fetch tokenizer and dataset
     tokenizer = AutoTokenizer.from_pretrained(conf['model_name_or_path'])
