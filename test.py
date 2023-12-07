@@ -1,0 +1,63 @@
+from transformers import AutoTokenizer, AutoModelForTokenClassification, DataCollatorForTokenClassification, Trainer, TrainingArguments
+from datasets import load_dataset
+
+from sys import argv
+
+from metrics import set_compute_metrics
+from tokenizer import tokenize_and_align_labels, system_B_labels
+import labels
+
+system = argv[1]
+if system not in ['A', 'B']:
+    raise ValueError('Fine-tuning system is either "A" or "B". ') 
+
+try:
+    model_dir = argv[2]
+except IndexError:
+    model_dir = None
+
+def main(system, model_dir):
+    if model_dir == None:
+        model_dir = f'./{system}_results'
+    
+    tokenizer = AutoTokenizer.from_pretrained(model_dir)
+    data_collator = DataCollatorForTokenClassification(tokenizer=tokenizer)
+
+    label_list = labels.label_list
+
+    # load and process the dataset
+    #if train.py was run before, Huggingface should have cached the dataset
+    dataset = load_dataset('Babelscape/multinerd', split='test')
+
+    # filter dataset to only contain English data
+    eng_dataset = dataset.filter(lambda batch: [lang=='en' for lang in batch['lang']], batched=True)
+
+    # tokenize the dataset and adjust the labels accordingly
+    process_dataset = tokenize_and_align_labels(tokenizer=tokenizer)
+    tokenized_eng = eng_dataset.map(process_dataset, batched=True)
+
+    if system == 'B':
+        label_list = labels.label_list_B
+        tokenized_eng = tokenized_eng.map(system_B_labels, batched=True)
+
+    test_model = AutoModelForTokenClassification.from_pretrained(model_dir).to('cuda')
+
+    test_args = TrainingArguments(
+        output_dir = f'./{system}_test',
+        do_train = False,
+        do_predict = True,
+        per_device_eval_batch_size = 64
+    )
+
+    tester = Trainer(
+                model = test_model,
+                args = test_args,
+                tokenizer=tokenizer,
+                data_collator = data_collator,
+                compute_metrics = set_compute_metrics(label_list)
+    )
+
+    tester.evaluate(eval_dataset=tokenized_eng)
+
+if __name__ == "__main__":
+    main()
