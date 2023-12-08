@@ -10,7 +10,7 @@ from collections import defaultdict
 
 from sys import argv
 from conf import load_conf
-from tokenizer import tokenize_and_align_labels, system_B_labels
+from tokenizer import process_dataset, system_B_labels
 import labels
 from metrics import set_compute_metrics
 
@@ -32,8 +32,7 @@ def main(system, conf, output_dir):
     eng_dataset = dataset.filter(lambda batch: [lang=='en' for lang in batch['lang']], batched=True)
 
     # tokenize the dataset and adjust the labels accordingly
-    process_dataset = tokenize_and_align_labels(tokenizer=tokenizer)
-    tokenized_eng = eng_dataset.map(process_dataset, batched=True)
+    tokenized_eng = eng_dataset.map(process_dataset(tokenizer), batched=True)
 
     # set data collator, pads to len(longest example of the batch)
     data_collator = DataCollatorForTokenClassification(tokenizer=tokenizer)
@@ -103,4 +102,4 @@ def main(system, conf, output_dir):
     trainer.save_model()
 
 if __name__ == "__main__":
-    main()
+    main(system=system, conf=conf, output_dir=output_dir)

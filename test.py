@@ -4,7 +4,7 @@ from datasets import load_dataset
 from sys import argv
 
 from metrics import set_compute_metrics
-from tokenizer import tokenize_and_align_labels, system_B_labels
+from tokenizer import process_dataset, system_B_labels
 import labels
 
 if len(argv) != 4:
@@ -28,8 +28,7 @@ def main(system, model_dir, output_dir):
     eng_dataset = dataset.filter(lambda batch: [lang=='en' for lang in batch['lang']], batched=True)
 
     # tokenize the dataset and adjust the labels accordingly
-    process_dataset = tokenize_and_align_labels(tokenizer=tokenizer)
-    tokenized_eng = eng_dataset.map(process_dataset, batched=True)
+    tokenized_eng = eng_dataset.map(process_dataset(tokenizer), batched=True)
 
     if system == 'B':
         label_list = labels.label_list_B
@@ -55,4 +54,4 @@ def main(system, model_dir, output_dir):
     tester.evaluate(eval_dataset=tokenized_eng)
 
 if __name__ == "__main__":
-    main()
+    main(system=system, model_dir=model_dir, output_dir=output_dir)
