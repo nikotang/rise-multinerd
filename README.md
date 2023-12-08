@@ -23,7 +23,7 @@ directory to the `conf.yml` file, and
 an output directory. 
 For example, to finetune a system A model, i.e. on all the NER tags:
 ```
-python train.py A ./conf.yml ./output_dir
+python train.py A ./conf.yml ./model_output_dir
 ```
 Hyperparameters and other configurations can be set in `conf.yml`.
 
@@ -33,7 +33,7 @@ a directory to your model, and
 an output directory for tensorboard files. 
 For example, to test a model on all the NER tags:
 ```
-python test.py A ./a_results
+python test.py A ./model_dir ./eval_output_dir
 ```
 
 A Jupyter notebook version is also available.
