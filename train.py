@@ -1,5 +1,5 @@
 from transformers import AutoTokenizer, AutoModelForTokenClassification, DataCollatorForTokenClassification, Trainer, TrainingArguments, EarlyStoppingCallback
-from datasets import load_dataset
+from datasets import load_dataset, disable_progress_bar
 import accelerate
 import evaluate
 
@@ -26,6 +26,7 @@ def main(system, conf, output_dir):
 
     # fetch tokenizer and dataset
     tokenizer = AutoTokenizer.from_pretrained(conf['model_name_or_path'])
+    disable_progress_bar()
     dataset = load_dataset('Babelscape/multinerd')
 
     # filter dataset to only contain English data

@@ -1,5 +1,5 @@
 from transformers import AutoTokenizer, AutoModelForTokenClassification, DataCollatorForTokenClassification, Trainer, TrainingArguments
-from datasets import load_dataset
+from datasets import load_dataset, disable_progress_bar
 
 from sys import argv
 import json
@@ -23,6 +23,7 @@ def main(system, model_dir, output_dir):
 
     # load and process the dataset
     #if train.py was run before, Huggingface should have cached the dataset
+    disable_progress_bar()
     dataset = load_dataset('Babelscape/multinerd', split='test')
 
     # filter dataset to only contain English data
