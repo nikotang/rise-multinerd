@@ -42,7 +42,9 @@ def main(system, model_dir, output_dir):
         output_dir = output_dir,
         do_train = False,
         do_predict = True,
-        per_device_eval_batch_size = 64
+        per_device_eval_batch_size = 64,
+        log_level='info',
+        disable_tqdm=True
     )
 
     tester = Trainer(
