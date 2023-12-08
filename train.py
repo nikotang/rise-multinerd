@@ -10,7 +10,7 @@ from collections import defaultdict
 
 from sys import argv
 from conf import load_conf
-from tokenizer import process_dataset, system_B_labels
+from tokenization import process_dataset, system_B_labels
 import labels
 from metrics import set_compute_metrics
 

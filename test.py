@@ -2,9 +2,10 @@ from transformers import AutoTokenizer, AutoModelForTokenClassification, DataCol
 from datasets import load_dataset
 
 from sys import argv
+import json
 
 from metrics import set_compute_metrics
-from tokenizer import process_dataset, system_B_labels
+from tokenization import process_dataset, system_B_labels
 import labels
 
 if len(argv) != 4:
@@ -48,10 +49,13 @@ def main(system, model_dir, output_dir):
                 args = test_args,
                 tokenizer=tokenizer,
                 data_collator = data_collator,
-                compute_metrics = set_compute_metrics(label_list)
+                compute_metrics = set_compute_metrics(label_list, per_type=True)
     )
 
-    tester.evaluate(eval_dataset=tokenized_eng)
+    results = tester.evaluate(eval_dataset=tokenized_eng)
+
+    with open(f'{output_dir}/results.json', 'w') as fout:
+        json.dump(results, fout, indent=4)
 
 if __name__ == "__main__":
     main(system=system, model_dir=model_dir, output_dir=output_dir)
