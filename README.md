@@ -1,13 +1,13 @@
 # Assignment: Research Engineer in Natural Language Processing
 ## RISE Research Institutes of Sweden
 
-This repo contains code that finetunes a language model on the English data of MultiNERD (<https://aclanthology.org/2022.findings-naacl.60.pdf>)
+This repo contains code that finetunes a language model on the English data of [MultiNERD](<https://aclanthology.org/2022.findings-naacl.60.pdf>)
 
 Two finetuned systems can be produced: 
 * system **A** is finetuned on all given NER tags
 * system **B** is finetuned on PERSON(PER), ORGANIZATION(ORG), LOCATION(LOC), DISEASES(DIS), and ANIMAL(ANIM) only
 
-The models are evaluated with precision, recall and F1 from seqeval.
+The models are evaluated with precision, recall and F1 from [seqeval](https://huggingface.co/spaces/evaluate-metric/seqeval/blob/main/seqeval.py).
 
 ### To replicate:
 
@@ -30,7 +30,7 @@ Hyperparameters and other configurations can be set in `conf.yml`.
 To test, run `test.py` followed by 
 `A` or `B` to choose the dataset labels for the test set, 
 a directory to your model, and 
-an output directory for tensorboard files. 
+an output directory for a `results.json` file that contains evaluation results. 
 For example, to test a model on all the NER tags:
 ```
 python test.py A ./model_dir ./eval_output_dir
