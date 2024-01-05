@@ -10,6 +10,7 @@ def process_dataset(tokenizer):
     nonlocal tokenizer
     tokenized_inputs = tokenizer(examples['tokens'], truncation=True, is_split_into_words=True) # the examples are already split into words
     labels = []
+    all_word_ids = []
     for i, label in enumerate(examples['ner_tags']):
       word_ids = tokenized_inputs.word_ids(batch_index=i)  # Map tokens to their respective word
       previous_word_idx = None
@@ -23,7 +24,9 @@ def process_dataset(tokenizer):
           label_ids.append(-100)
         previous_word_idx = word_idx
       labels.append(label_ids)
+      all_word_ids.append(word_ids)
     tokenized_inputs['labels'] = labels
+    tokenized_inputs['word_ids'] = all_word_ids
     return tokenized_inputs
   return tokenize_and_align_labels
 
