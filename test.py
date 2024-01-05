@@ -4,6 +4,7 @@ from datasets import load_dataset, disable_progress_bar
 import argparse
 from pathlib import Path
 import json
+from scipy.special import softmax
 
 from metrics import set_compute_metrics
 from tokenization import process_dataset, system_B_labels
@@ -60,10 +61,43 @@ def main(args):
                 compute_metrics = set_compute_metrics(label_list, per_type=True)
     )
 
-    results = tester.evaluate(eval_dataset=tokenized_eng)
+    test_results = tester.predict(test_dataset=tokenized_eng)
 
+<<<<<<< HEAD
     with open(f'{args.output_dir}/results.json', 'w') as fout:
+=======
+    # List words and ner tags predicted
+    probabilities = softmax(test_results.predictions, axis=-1)
+    predictions = test_results.predictions.argmax(dim=-1).tolist()
+    results = []
+    idx = 0
+    for i, prediction in enumerate(predictions):
+        result = []
+        while idx < len(prediction):
+            pred = prediction[idx]
+            label = test_model.config.id2label[pred]
+            if label != 'O':
+                word_idx = tokenized_eng['word_ids'][i][idx]
+                result.append(
+                    {
+                    'word_idx': word_idx,
+                    'entity': label,
+                    'score': probabilities[i][idx][pred], 
+                    'word': eng_dataset['tokens'][i][word_idx],
+                    }
+                )
+                while tokenized_eng['word_ids'][i][idx] == word_idx:
+                    idx += 1
+            else:
+                idx += 1
+        results.append(result)
+        
+    with open(f'{output_dir}/results.json', 'w') as fout:
+>>>>>>> a3889b0 (add predicted results to test output)
         json.dump(results, fout, indent=4)
+
+    with open(f'{output_dir}/metrics.json', 'w') as fout:
+        json.dump(test_results.metrics, fout, indent=4)
 
 if __name__ == "__main__":
     main(args=args)
