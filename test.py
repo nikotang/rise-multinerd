@@ -5,6 +5,7 @@ import argparse
 from pathlib import Path
 import json
 from scipy.special import softmax
+from tqdm import tqdm
 
 from metrics import set_compute_metrics
 from tokenization import process_dataset, system_B_labels
@@ -68,21 +69,21 @@ def main(args):
 =======
     # List words and ner tags predicted
     probabilities = softmax(test_results.predictions, axis=-1)
-    predictions = test_results.predictions.argmax(dim=-1).tolist()
+    predictions = test_results.predictions.argmax(axis=-1)
     results = []
-    idx = 0
-    for i, prediction in enumerate(predictions):
+    for i, prediction in enumerate(tqdm(predictions)):
         result = []
-        while idx < len(prediction):
+        idx = 0
+        while idx < len(tokenized_eng['input_ids'][i]):
             pred = prediction[idx]
-            label = test_model.config.id2label[pred]
-            if label != 'O':
-                word_idx = tokenized_eng['word_ids'][i][idx]
+            word_idx = tokenized_eng['word_ids'][i][idx]
+            if pred != 0 and word_idx != None:
+                label = test_model.config.id2label[pred]
                 result.append(
                     {
                     'word_idx': word_idx,
                     'entity': label,
-                    'score': probabilities[i][idx][pred], 
+                    'score': float(probabilities[i][idx][pred]), 
                     'word': eng_dataset['tokens'][i][word_idx],
                     }
                 )
