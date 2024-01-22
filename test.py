@@ -1,19 +1,21 @@
 from transformers import AutoTokenizer, AutoModelForTokenClassification, DataCollatorForTokenClassification, Trainer, TrainingArguments
 from datasets import load_dataset, disable_progress_bar
 
-from sys import argv
+import argparse
+from pathlib import Path
 import json
 
 from metrics import set_compute_metrics
 from tokenization import process_dataset, system_B_labels
 import labels
 
-if len(argv) != 4:
-    raise Exception('Give 3 arguments: system, model directory and output directory. ')
-
-system, model_dir, output_dir = argv[1:4]
-if system not in ['A', 'B']:
-    raise ValueError('Fine-tuning system is either "A" or "B". ') 
+parser = argparse.ArgumentParser(description='''Test a language model finetuned on MultiNERD English examples. 
+                                 System A trains on all NER labels;
+                                 system B trains only on PER, ORG, LOC, DIS and ANIM. ''')
+parser.add_argument('system', choices=['A', 'B'], help='System "A" or "B"')
+parser.add_argument('model_dir', type=Path, help='Path to the model directory')
+parser.add_argument('output_dir', type=Path, help='Path to the output directory')
+args = parser.parse_args()
 
 def main(system, model_dir, output_dir):
     tokenizer = AutoTokenizer.from_pretrained(model_dir)
@@ -61,4 +63,4 @@ def main(system, model_dir, output_dir):
         json.dump(results, fout, indent=4)
 
 if __name__ == "__main__":
-    main(system=system, model_dir=model_dir, output_dir=output_dir)
+    main(system=args.system, model_dir=args.model_dir, output_dir=args.output_dir)

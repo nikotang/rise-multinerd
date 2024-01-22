@@ -7,19 +7,21 @@ import numpy as np
 import gc
 import torch
 from collections import defaultdict
+import argparse
+from pathlib import Path
 
-from sys import argv
 from conf import load_conf
 from tokenization import process_dataset, system_B_labels
 import labels
 from metrics import set_compute_metrics
 
-if len(argv) != 4:
-    raise Exception('Give 3 arguments: system, config directory and output directory. ')
-
-system, conf, output_dir = argv[1:4]
-if system not in ['A', 'B']:
-    raise ValueError('Fine-tuning system is either "A" or "B". ') 
+parser = argparse.ArgumentParser(description='''Train a language model on MultiNERD English examples. 
+                                 System A trains on all NER labels;
+                                 system B trains only on PER, ORG, LOC, DIS and ANIM. ''')
+parser.add_argument('system', choices=['A', 'B'], help='System "A" or "B"')
+parser.add_argument('conf', type=Path, help='Path to the config YAML file')
+parser.add_argument('output_dir', type=Path, help='Path to the output directory')
+args = parser.parse_args()
 
 def main(system, conf, output_dir):
     conf = load_conf(conf)
@@ -103,4 +105,4 @@ def main(system, conf, output_dir):
     trainer.save_model()
 
 if __name__ == "__main__":
-    main(system=system, conf=conf, output_dir=output_dir)
+    main(system=args.system, conf=args.conf, output_dir=args.output_dir)
