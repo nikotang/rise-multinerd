@@ -15,6 +15,7 @@ parser = argparse.ArgumentParser(description='''Test a language model finetuned 
 parser.add_argument('system', choices=['A', 'B'], help='System "A" or "B"')
 parser.add_argument('model_dir', type=Path, help='Path to the model directory')
 parser.add_argument('output_dir', type=Path, help='Path to the output directory')
+parser.add_argument('--disable_tqdm', action='store_true', help='Disable tqdm')
 parser.add_argument('-d', '--device', type=str, help='Device to test the model on', default='cuda')
 args = parser.parse_args()
 
@@ -26,7 +27,8 @@ def main(args):
 
     # load and process the dataset
     #if train.py was run before, Huggingface should have cached the dataset
-    disable_progress_bar()
+    if args.disable_tqdm:
+        disable_progress_bar()
     dataset = load_dataset('Babelscape/multinerd', split='test')
 
     # filter dataset to only contain English data
@@ -47,7 +49,7 @@ def main(args):
         do_predict = True,
         per_device_eval_batch_size = 64,
         log_level='info',
-        disable_tqdm=True
+        disable_tqdm=args.disable_tqdm
     )
 
     tester = Trainer(
