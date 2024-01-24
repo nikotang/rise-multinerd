@@ -15,6 +15,7 @@ parser = argparse.ArgumentParser(description='''Test a language model finetuned 
 parser.add_argument('system', choices=['A', 'B'], help='System "A" or "B"')
 parser.add_argument('model_dir', type=Path, help='Path to the model directory')
 parser.add_argument('output_dir', type=Path, help='Path to the output directory')
+parser.add_argument('-d', '--device', type=str, help='Device to test the model on', default='cuda')
 args = parser.parse_args()
 
 def main(args):
@@ -38,7 +39,7 @@ def main(args):
         label_list = labels.label_list_B
         tokenized_eng = tokenized_eng.map(system_B_labels, batched=True)
 
-    test_model = AutoModelForTokenClassification.from_pretrained(args.model_dir).to('cuda')
+    test_model = AutoModelForTokenClassification.from_pretrained(args.model_dir).to(args.device)
 
     test_args = TrainingArguments(
         output_dir = args.output_dir,

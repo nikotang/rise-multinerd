@@ -21,6 +21,7 @@ parser = argparse.ArgumentParser(description='''Train a language model on MultiN
 parser.add_argument('system', choices=['A', 'B'], help='System "A" or "B"')
 parser.add_argument('conf', type=Path, help='Path to the config YAML file')
 parser.add_argument('output_dir', type=Path, help='Path to the output directory')
+parser.add_argument('-d', '--device', type=str, help='Device to train the model on', default='cuda')
 args = parser.parse_args()
 
 def main(args):
@@ -53,7 +54,8 @@ def main(args):
 
     #finetune
     gc.collect()
-    torch.cuda.empty_cache()
+    if args.device == 'cuda':
+        torch.cuda.empty_cache()
 
     CUDA_VISIBLE_DEVICES=0
 
@@ -87,7 +89,7 @@ def main(args):
                                                             id2label=id2label, 
                                                             label2id=label2id,
                                                             hidden_dropout_prob=conf['hidden_dropout_prob'],
-                                                            ).to('cuda')
+                                                            ).to(args.device)
 
     trainer = Trainer(
         model=model, 
