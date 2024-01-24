@@ -17,7 +17,8 @@ parser = argparse.ArgumentParser(description='''Test a language model finetuned 
 parser.add_argument('system', choices=['A', 'B'], help='System "A" or "B"')
 parser.add_argument('model_dir', type=Path, help='Path to the model directory')
 parser.add_argument('output_dir', type=Path, help='Path to the output directory')
-parser.add_argument('--disable_tqdm', action='store_true', help='Disable tqdm')
+parser.add_argument('-p', '--output_predictions', action='store_true', help='Output predictions on test set as results.json')
+parser.add_argument('--disable_tqdm', action='store_true', default=False, help='Disable tqdm')
 parser.add_argument('-d', '--device', type=str, help='Device to test the model on', default='cuda')
 args = parser.parse_args()
 
@@ -64,40 +65,37 @@ def main(args):
 
     test_results = tester.predict(test_dataset=tokenized_eng)
 
-<<<<<<< HEAD
-    with open(f'{args.output_dir}/results.json', 'w') as fout:
-=======
-    # List words and ner tags predicted
-    probabilities = softmax(test_results.predictions, axis=-1)
-    predictions = test_results.predictions.argmax(axis=-1)
-    results = []
-    for i, prediction in enumerate(tqdm(predictions)):
-        result = []
-        idx = 0
-        while idx < len(tokenized_eng['input_ids'][i]):
-            pred = prediction[idx]
-            word_idx = tokenized_eng['word_ids'][i][idx]
-            if pred != 0 and word_idx != None:
-                label = test_model.config.id2label[pred]
-                result.append(
-                    {
-                    'word_idx': word_idx,
-                    'entity': label,
-                    'score': float(probabilities[i][idx][pred]), 
-                    'word': eng_dataset['tokens'][i][word_idx],
-                    }
-                )
-                while tokenized_eng['word_ids'][i][idx] == word_idx:
+    if args.output_predictions:
+        # List words and ner tags predicted
+        probabilities = softmax(test_results.predictions, axis=-1)
+        predictions = test_results.predictions.argmax(axis=-1)
+        results = []
+        for i, prediction in enumerate(tqdm(predictions, disable=args.disable_tqdm)):
+            result = []
+            idx = 0
+            while idx < len(tokenized_eng['input_ids'][i]):
+                pred = prediction[idx]
+                word_idx = tokenized_eng['word_ids'][i][idx]
+                if pred != 0 and word_idx != None:
+                    label = test_model.config.id2label[pred]
+                    result.append(
+                        {
+                        'word_idx': word_idx,
+                        'entity': label,
+                        'score': float(probabilities[i][idx][pred]), 
+                        'word': eng_dataset['tokens'][i][word_idx],
+                        }
+                    )
+                    while tokenized_eng['word_ids'][i][idx] == word_idx:
+                        idx += 1
+                else:
                     idx += 1
-            else:
-                idx += 1
-        results.append(result)
-        
-    with open(f'{output_dir}/results.json', 'w') as fout:
->>>>>>> a3889b0 (add predicted results to test output)
-        json.dump(results, fout, indent=4)
+            results.append(result)
+            
+        with open(f'{args.output_dir}/results.json', 'w') as fout:
+            json.dump(results, fout, indent=4)
 
-    with open(f'{output_dir}/metrics.json', 'w') as fout:
+    with open(f'{args.output_dir}/metrics.json', 'w') as fout:
         json.dump(test_results.metrics, fout, indent=4)
 
 if __name__ == "__main__":

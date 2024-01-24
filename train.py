@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser(description='''Train a language model on MultiN
 parser.add_argument('system', choices=['A', 'B'], help='System "A" or "B"')
 parser.add_argument('conf', type=Path, help='Path to the config YAML file')
 parser.add_argument('output_dir', type=Path, help='Path to the output directory')
-parser.add_argument('--disable_tqdm', action='store_true', help='Disable tqdm')
+parser.add_argument('--disable_tqdm', action='store_true', default=False, help='Disable tqdm')
 parser.add_argument('-d', '--device', type=str, help='Device to train the model on', default='cuda')
 args = parser.parse_args()
 
