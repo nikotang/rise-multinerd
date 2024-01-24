@@ -23,8 +23,8 @@ parser.add_argument('conf', type=Path, help='Path to the config YAML file')
 parser.add_argument('output_dir', type=Path, help='Path to the output directory')
 args = parser.parse_args()
 
-def main(system, conf, output_dir):
-    conf = load_conf(conf)
+def main(args):
+    conf = load_conf(args.conf)
 
     # fetch tokenizer and dataset
     tokenizer = AutoTokenizer.from_pretrained(conf['model_name_or_path'])
@@ -45,7 +45,7 @@ def main(system, conf, output_dir):
     id2label = labels.id2label
     label_list = labels.label_list
 
-    if system == 'B':
+    if args.system == 'B':
         label2id = labels.label2id_B
         id2label = labels.id2label_B
         label_list = labels.label_list_B
@@ -59,7 +59,7 @@ def main(system, conf, output_dir):
 
     # set arguments
     training_args = TrainingArguments(
-        output_dir=output_dir,         
+        output_dir=args.output_dir,         
         num_train_epochs=conf['num_epochs'],
         max_steps=conf['max_steps'],                        # overrides training epochs
         per_device_train_batch_size=conf['per_gpu_train_batch_size'],
@@ -68,7 +68,7 @@ def main(system, conf, output_dir):
         learning_rate=conf['learning_rate'],
         weight_decay=conf['weight_decay'],
         log_level='info',
-        logging_dir=f'./{system}_logs', 
+        logging_dir=f'./{args.system}_logs', 
         logging_steps=conf['log_steps'],
         evaluation_strategy='steps', 
         eval_steps=conf['eval_steps'],
@@ -105,4 +105,4 @@ def main(system, conf, output_dir):
     trainer.save_model()
 
 if __name__ == "__main__":
-    main(system=args.system, conf=args.conf, output_dir=args.output_dir)
+    main(args=args)

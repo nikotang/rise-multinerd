@@ -17,8 +17,8 @@ parser.add_argument('model_dir', type=Path, help='Path to the model directory')
 parser.add_argument('output_dir', type=Path, help='Path to the output directory')
 args = parser.parse_args()
 
-def main(system, model_dir, output_dir):
-    tokenizer = AutoTokenizer.from_pretrained(model_dir)
+def main(args):
+    tokenizer = AutoTokenizer.from_pretrained(args.model_dir)
     data_collator = DataCollatorForTokenClassification(tokenizer=tokenizer)
 
     label_list = labels.label_list
@@ -34,14 +34,14 @@ def main(system, model_dir, output_dir):
     # tokenize the dataset and adjust the labels accordingly
     tokenized_eng = eng_dataset.map(process_dataset(tokenizer), batched=True)
 
-    if system == 'B':
+    if args.system == 'B':
         label_list = labels.label_list_B
         tokenized_eng = tokenized_eng.map(system_B_labels, batched=True)
 
-    test_model = AutoModelForTokenClassification.from_pretrained(model_dir).to('cuda')
+    test_model = AutoModelForTokenClassification.from_pretrained(args.model_dir).to('cuda')
 
     test_args = TrainingArguments(
-        output_dir = output_dir,
+        output_dir = args.output_dir,
         do_train = False,
         do_predict = True,
         per_device_eval_batch_size = 64,
@@ -59,8 +59,8 @@ def main(system, model_dir, output_dir):
 
     results = tester.evaluate(eval_dataset=tokenized_eng)
 
-    with open(f'{output_dir}/results.json', 'w') as fout:
+    with open(f'{args.output_dir}/results.json', 'w') as fout:
         json.dump(results, fout, indent=4)
 
 if __name__ == "__main__":
-    main(system=args.system, model_dir=args.model_dir, output_dir=args.output_dir)
+    main(args=args)
