@@ -70,24 +70,26 @@ def main(args):
         probabilities = softmax(test_results.predictions, axis=-1)
         predictions = test_results.predictions.argmax(axis=-1)
         results = []
-        for i, prediction in enumerate(tqdm(predictions, disable=args.disable_tqdm)):
+        for i, prediction in enumerate(tqdm(predictions, disable=args.disable_tqdm,
+                                            desc='Compiling results.json')):
             result = []
             idx = 0
-            while idx < len(tokenized_eng['input_ids'][i]):
+            word_ids = tokenized_eng['word_ids'][i]
+            tokens = eng_dataset['tokens'][i]
+            while idx < len(word_ids):
                 pred = prediction[idx]
-                word_idx = tokenized_eng['word_ids'][i][idx]
-                if pred != 0 and word_idx != None:
+                word_idx = word_ids[idx]
+                if pred != 0 and word_idx is not None:
                     label = test_model.config.id2label[pred]
                     result.append(
                         {
                         'word_idx': word_idx,
                         'entity': label,
-                        'score': float(probabilities[i][idx][pred]), 
-                        'word': eng_dataset['tokens'][i][word_idx],
+                        'score': float(probabilities[i][idx, pred]), 
+                        'word': tokens[word_idx]
                         }
-                    )
-                    while tokenized_eng['word_ids'][i][idx] == word_idx:
-                        idx += 1
+                    )                    
+                    idx += word_ids[idx:].count(word_idx)
                 else:
                     idx += 1
             results.append(result)
