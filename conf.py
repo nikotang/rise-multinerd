@@ -1,5 +1,3 @@
-import os
-
 import yaml
 try:
     from yaml import CLoader as Loader

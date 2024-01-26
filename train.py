@@ -1,12 +1,8 @@
 from transformers import AutoTokenizer, AutoModelForTokenClassification, DataCollatorForTokenClassification, Trainer, TrainingArguments, EarlyStoppingCallback
 from datasets import load_dataset, disable_progress_bar
-import accelerate
-import evaluate
 
-import numpy as np
 import gc
 import torch
-from collections import defaultdict
 import argparse
 from pathlib import Path
 
@@ -58,8 +54,6 @@ def main(args):
     gc.collect()
     if args.device == 'cuda':
         torch.cuda.empty_cache()
-
-    CUDA_VISIBLE_DEVICES=0
 
     # set arguments
     training_args = TrainingArguments(
