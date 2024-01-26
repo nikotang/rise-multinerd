@@ -10,8 +10,6 @@ The models are evaluated with precision, recall and F1 from [seqeval](https://hu
 
 ### To replicate:
 
-An available GPU is assumed.
-
 First, install the required packages:
 ```
 pip install -r requirements.txt
@@ -29,7 +27,7 @@ Hyperparameters and other configurations can be set in `conf.yml`.
 To test, run `test.py` followed by 
 `A` or `B` to choose the dataset labels for the test set, 
 a directory to your model, and 
-an output directory for `results.json` and `metrics.json`, that contains evaluation results and metrics respectively. 
+an output directory for `metrics.json` and `results.json`. 
 For example, to test a model on all the NER tags:
 ```
 python test.py A ./model_dir ./eval_output_dir
@@ -37,6 +35,11 @@ python test.py A ./model_dir ./eval_output_dir
 
 A Jupyter notebook version is also available.
 
-Update (5/1/2024): Test output now includes the individual words and NER tags predicted.
+Update (26/1/2024): Optional CLI arguments added:
+```
+-d , --device              Device to train/test the model on (default='cuda')
+--disable_tqdm             Disable tqdm
+-p, --output_predictions   (Only for test.py) Output predictions on test set as results.json
+```
 
 *An assignment for RISE.*
